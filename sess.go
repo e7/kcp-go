@@ -860,7 +860,12 @@ func (l *Listener) SetWriteDeadline(t time.Time) error {
 
 // Close stops listening on the UDP address. Already Accepted connections are not closed.
 func (l *Listener) Close() error {
-	close(l.die)
+	select {
+	case <-l.die:
+		// Already closed. Don't close again.
+	default:
+		close(l.die)
+	}
 	return l.conn.Close()
 }
 
