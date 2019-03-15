@@ -927,10 +927,15 @@ func ServeConn(block BlockCrypt, dataShards, parityShards int, conn net.PacketCo
 }
 
 // Dial connects to the remote address "raddr" on the network "udp"
-func Dial(raddr string) (net.Conn, error) { return DialWithOptions(raddr, nil, 0, 0) }
+func Dial(raddr string) (net.Conn, error) { return DialWithOptions(raddr, nil,nil, 0, 0) }
+
+// Dial connects to the remote address "raddr" on the network "udp"
+func DialWithLocalAddr(raddr string, laddr *net.UDPAddr) (net.Conn, error) {
+	return DialWithOptions(raddr, laddr,nil, 0, 0)
+}
 
 // DialWithOptions connects to the remote address "raddr" on the network "udp" with packet encryption
-func DialWithOptions(raddr string, block BlockCrypt, dataShards, parityShards int) (*UDPSession, error) {
+func DialWithOptions(raddr string, laddr *net.UDPAddr, block BlockCrypt, dataShards, parityShards int) (*UDPSession, error) {
 	// network type detection
 	udpaddr, err := net.ResolveUDPAddr("udp", raddr)
 	if err != nil {
@@ -941,7 +946,7 @@ func DialWithOptions(raddr string, block BlockCrypt, dataShards, parityShards in
 		network = "udp"
 	}
 
-	conn, err := net.ListenUDP(network, nil)
+	conn, err := net.ListenUDP(network, laddr)
 	if err != nil {
 		return nil, errors.Wrap(err, "net.DialUDP")
 	}
